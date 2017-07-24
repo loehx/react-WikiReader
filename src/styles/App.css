@@ -1,0 +1,59 @@
+/* Base Application Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#app {
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: 100%;
+}
+
+img {
+  max-width: 100%;
+}
+
+.pad-xs {
+  padding: 4px;
+}
+
+.pad-sm {
+  padding: 8px;
+}
+
+.pad-md, .pad {
+  padding: 16px;
+}
+
+.pad-lg {
+  padding: 32px;
+}
+
+.pad-xl {
+  padding: 64px;
+}
+
+
+
+
+.mart-xs {
+  margin-top: 4px;
+}
+
+.mart-sm {
+  margin-top: 8px;
+}
+
+.mart-md, .mart {
+  margin-top: 16px;
+}
+
+.mart-lg {
+  margin-top: 32px;
+}
+
+.mart-xl {
+  margin-top: 64px;
+}

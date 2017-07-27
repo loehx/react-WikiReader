@@ -1,32 +1,34 @@
 'use strict';
 
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
-import AppActions from '../actions/AppActions'
+import WikiActions from '../actions.wiki'
 import {List, ListItem} from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
-import Divider from 'material-ui/Divider';
-import Checkbox from 'material-ui/Checkbox';
-import Toggle from 'material-ui/Toggle';
+
 
 const wikiLogoSrc = require('../images/wiki.png');
 const RESULT_ITEM_LIMIT = 20;
 
-class Search extends React.Component {
+@connect(({ wiki }) => {
+  return {
+    articles: wiki.articles,
+    took: wiki.took,
+    isLoading: !!wiki.isLoading,
+    isComplete: !!wiki.isComplete,
+    errorMessage: wiki.errorMessage
+  }
+})
+export default class Search extends React.Component {
 
   constructor() {
     super();
     this.state = {
       searchTerm: ''
     };
-  }
-
-  componentWillMount() {
-    AppActions.on('LOADING', (isLoading) => this.setState({ isLoading: isLoading }));
-    AppActions.on('WIKI_SEARCH_RESULT', this.onSearchResult.bind(this));
-    AppActions.on('ERROR', (error) => this.setState({ errorMessage: error }));
   }
 
   onSearchResult({ took, searchTerm, items }) {
@@ -37,15 +39,14 @@ class Search extends React.Component {
       })
     }
 
-  searchFor(event) {
+  formSubmit(event) {
     event.preventDefault();
-    this.setState({
-      errorMessage: null,
-      isLoading: false,
-      results: null,
-      took: null
-    });
-    AppActions.searchFor(this.state.searchTerm, RESULT_ITEM_LIMIT);
+    this.searchForTerm();
+  }
+
+  searchForTerm() {
+    if (this.state.searchTerm)
+      WikiActions.searchFor(this.state.searchTerm, RESULT_ITEM_LIMIT);
   }
 
   handleChange = (event) => {
@@ -54,29 +55,31 @@ class Search extends React.Component {
     });
   };
 
-  openArticle(articleInfo) {
-    AppActions.openArticle(articleInfo);
+  openArticle(name, event) {
+    event.preventDefault();
+    WikiActions.openArticle(name);
   }
 
-  renderResult(articleInfo) {
+  renderResult({ name, description }) {
      return <ListItem
-          key={articleInfo.name}
-          primaryText={articleInfo.name}
-          secondaryText={articleInfo.description}
-          onClick={this.openArticle.bind(this, articleInfo)} />;
+          key={name}
+          primaryText={name}
+          secondaryText={description}
+          onClick={this.openArticle.bind(this, name)} />;
   }
-
+ 
   renderResults() {
-    const { isLoading, results, errorMessage } = this.state;
+    const { isComplete, isLoading, articles, took, errorMessage } = this.props;
 
-    if (isLoading) return <center>Loading ...</center>;
-    if (errorMessage) return <center><i>{errorMessage}</i></center>;
-    if (!results) return null;
-    if (results.length == 0) return <div>No results</div>
+    if (!isComplete) return null;
+    if (isLoading) return <h3>Loading ...</h3>;
+    if (errorMessage) return <h3>{errorMessage}</h3>;
+    if (!articles) return null;
+    if (articles.length == 0) return <h3>No results</h3>
 
     return <List>
-            <Subheader>{results.length} article(s) found in {this.state.took} ms</Subheader>
-            {results.map(this.renderResult.bind(this))}
+            <Subheader>{articles.length} article(s) found in {took} ms</Subheader>
+            {articles.map(this.renderResult.bind(this))}
           </List>;
   }
 
@@ -90,7 +93,7 @@ class Search extends React.Component {
             </div>
           </div>
 
-          <form className="row middle-xs center-xs" onSubmit={this.searchFor.bind(this)}>
+          <form className="row middle-xs center-xs" onSubmit={this.formSubmit.bind(this)}>
             <div className="col-xs-10 col-md-6 pad">
               <TextField
                 fullWidth={true}
@@ -105,7 +108,7 @@ class Search extends React.Component {
                 label="GO"
                 fullWidth={true}
                 primary={true}
-                onClick={this.searchFor.bind(this)} />
+                onClick={this.searchForTerm.bind(this)} />
             </div>
           </form>
 
@@ -122,5 +125,3 @@ Search.displayName = 'Search';
 Search.propTypes = {
   searchTerm: PropTypes.string
 };
-
-export default Search;

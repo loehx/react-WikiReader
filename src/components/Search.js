@@ -85,25 +85,25 @@ export default class Search extends React.Component {
 
   render() {
     return (
-        <div className="search-page">
+        <div className="search-page pad">
 
           <div className="row center-xs">
-            <div className="col-xs-6 pad-xl mart">
+            <div className="col-sm-6 col-xs-8 pad-xl mart">
               <img src={wikiLogoSrc} />
             </div>
           </div>
 
           <form className="row middle-xs center-xs" onSubmit={this.formSubmit.bind(this)}>
-            <div className="col-xs-10 col-md-6 pad">
+            <div className="col-xs-8 col-sm-6 pad">
               <TextField
                 fullWidth={true}
                 autoFocus
-                hintText="Enter a keyword to look for ..."
+                hintText="Please enter a keyword ..."
                 value={this.state.searchTerm}
                 onChange={this.handleChange.bind(this)} />
             </div>
 
-            <div className="col-xs-2 pad">
+            <div className="col-xs-4 col-sm-2 pad">
               <RaisedButton
                 label="GO"
                 fullWidth={true}

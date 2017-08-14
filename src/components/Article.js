@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import WikiActions from '../actions.wiki'
+import WikiActions from '../actions/wiki'
+import AppActions from '../actions/app'
 import Markdown from 'react-remarkable'
 
 import AppBar from 'material-ui/AppBar';
@@ -11,12 +12,12 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import OpenInNew from 'material-ui/svg-icons/action/open-in-new';
 
 
-@connect(({ wiki }) => {
+@connect(({wiki, app}) => {
   return {
     name: wiki.name,
     markdown: wiki.markdown,
-    isLoading: !!wiki.isLoading,
-    isComplete: !!wiki.isComplete,
+    isLoading: app.loading,
+    isComplete: app.complete,
     errorMessage: wiki.errorMessage,
     took: wiki.took,
     url: wiki.url
@@ -26,44 +27,50 @@ class Article extends React.Component {
 
   componentWillMount() {
     if (this.props.match.params.name)
-        WikiActions.fetchArticle(this.props.match.params.name);
+      WikiActions.fetchArticle(this.props.match.params.name);
   }
 
-  openOriginalPage(event) {
+  onLeftIconButtonTouchTap = (event) => {
     event.preventDefault();
-    WikiActions.openOriginalPage(this.props.name);
+    AppActions.openOriginalPage(this.props.name);
   }
 
-  openSearch(event) {
+  onRightIconButtonTouchTap = (event) => {
     event.preventDefault();
-    WikiActions.openSearch();
+    AppActions.openSearch();
   }
 
   render() {
-    const { isComplete, isLoading, markdown, name, took, url, errorMessage } = this.props;
+    const {isComplete, isLoading, markdown, name, took, url, errorMessage} = this.props;
 
     if (!isComplete) return null;
     if (isLoading) return <center>Loading ...</center>;
-    if (errorMessage) return <center><i>{errorMessage}</i></center>;
-    
+    if (errorMessage) return <center><i>{ errorMessage }</i></center>;
+
+    const closeButton = <IconButton>
+                            <NavigationClose />
+                        </IconButton>;
+    const openArticleButton = <IconButton>
+                                  <OpenInNew />
+                              </IconButton>
+
     return (
       <div className="article-page">
-        <AppBar
-            title={name}
-            iconElementRight={<IconButton><NavigationClose /></IconButton>}
-            onRightIconButtonTouchTap={this.openSearch.bind(this)}
-            iconElementLeft={<IconButton><OpenInNew /></IconButton>}
-            onLeftIconButtonTouchTap={this.openOriginalPage.bind(this)}
-            />
-        <div className="pad">
-          <Markdown source={markdown} />
+          <AppBar title={ name } iconElementRight={ closeButton } onRightIconButtonTouchTap={ this.onRightIconButtonTouchTap } iconElementLeft={ openArticleButton } onLeftIconButtonTouchTap={ this.onLeftIconButtonTouchTap }
+          />
           <div className="pad">
-            <div className="hint">it took {took} ms to load this page</div>
-            <div className="hint mart"><a href={url} target="_BLANK">{url}</a></div>
+              <Markdown source={ markdown } />
+              <div className="pad">
+                  <div className="hint">it took <span>{ took }</span> ms to load this page</div>
+                  <div className="hint mart">
+                      <a href={ url } target="_BLANK">
+                          { url }
+                      </a>
+                  </div>
+              </div>
           </div>
-        </div>
       </div>
-    );
+      );
   }
 }
 
